@@ -2,32 +2,63 @@ package todoer
 
 import (
     "io/ioutil"
-    "fmt"
     "net/http"
     "github.com/gorilla/mux"
+    "strings"
 )
 
 type User struct {
-    FirstName, LastName, EMail string
+    ID, FirstName, LastName, EMail string
 }
 
-func persistGetHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("TMOROZOV: "+r.URL.Path)
-    fmt.Println("TMOROZOV: "+r.Method)
-    fmt.Println(r.URL.Query()["firstname"])
-    w.WriteHeader(http.StatusOK)
+func userGetHandler(w http.ResponseWriter, r *http.Request) {
+    persistHandler, err := NewPersistHandler()
+    if(err != nil) {
+        panic(err)
+    }
+
+    req := `{`
+    for key := range r.URL.Query() {
+        req = req + `"`+key+`":"`+r.URL.Query().Get(key)+`",`
+    }
+    req = strings.TrimRight(req, ",")
+    req = req + `}`
+    res, code := persistHandler.persistHandlerRead(req)
+    w.WriteHeader(code)
+    w.Write([]byte(res))
 }
 
-func persistPutHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("TMOROZOV: "+r.URL.Path)
-    fmt.Println("TMOROZOV: "+r.Method)
+func userPutHandler(w http.ResponseWriter, r *http.Request) {
     body, _ := ioutil.ReadAll(r.Body)
-    fmt.Println(string(body))
-    w.WriteHeader(http.StatusCreated)
+
+    persistHandler, err := NewPersistHandler()
+    if(err != nil) {
+        panic(err)
+    }
+    res, code := persistHandler.persistHandlerCreate(string(body))
+    w.WriteHeader(code)
+    w.Write([]byte(res))
 }
 
-func persistDeleteHandler(w http.ResponseWriter, r *http.Request) {
-    w.WriteHeader(http.StatusOK)
+func userDeleteHandler(w http.ResponseWriter, r *http.Request) {
+    persistHandler, err := NewPersistHandler()
+    if(err != nil) {
+        panic(err)
+    }
+    res, code := persistHandler.persistHandlerDelete(`{"id": "`+r.URL.Query().Get("id")+`"}`)
+    w.WriteHeader(code)
+    w.Write([]byte(res))
+}
+
+func userUpdateHandler(w http.ResponseWriter, r *http.Request) {
+    body, _ := ioutil.ReadAll(r.Body)
+    persistHandler, err := NewPersistHandler()
+    if(err != nil) {
+        panic(err)
+    }
+    res, code := persistHandler.persistHandlerUpdate(`{"id": "`+r.URL.Query().Get("id")+`"}`, string(body))
+    w.WriteHeader(code)
+    w.Write([]byte(res))
 }
 
 func todoHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,10 +66,10 @@ func todoHandler(w http.ResponseWriter, r *http.Request) {
 
 func Handlers() *mux.Router {
     r := mux.NewRouter()
-
-    r.HandleFunc("/persist/{user}", persistGetHandler).Methods("GET")
-    r.HandleFunc("/persist/{user}", persistPutHandler).Methods("PUT")
-    r.HandleFunc("/persist/{user}", persistDeleteHandler).Methods("DELETE")
+    r.HandleFunc("/persist/users", userGetHandler).Methods("GET")
+    r.HandleFunc("/persist/users", userPutHandler).Methods("PUT")
+    r.HandleFunc("/persist/users", userUpdateHandler).Methods("POST")
+    r.HandleFunc("/persist/users", userDeleteHandler).Methods("DELETE")
 
     return r
 }

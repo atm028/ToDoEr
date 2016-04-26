@@ -4,12 +4,15 @@ import (
     "gopkg.in/mgo.v2"
     "gopkg.in/mgo.v2/bson"
     "encoding/json"
+    "math/rand"
 )
 
 type MongoWrapper struct {
     s *mgo.Session
     c *mgo.Collection
 }
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
 func NewMongoWrapper(addr, dbname, colname string) (*MongoWrapper, error) {
     w := new(MongoWrapper)
@@ -23,17 +26,28 @@ func NewMongoWrapper(addr, dbname, colname string) (*MongoWrapper, error) {
     return w, nil
 }
 
+func createID() string {
+    b := make([]rune, 12)
+    for i := range b {
+        b[i] = letters[rand.Intn(len(letters))]
+    }
+    return string(b)
+}
+
 func (w *MongoWrapper) Close() {
     w.s.Close()
 }
 
-func (w *MongoWrapper) Create(firstName, lastName, EMail string) error {
+func (w *MongoWrapper) Create(firstName, lastName, EMail string) (string, error) {
     result := User{}
+    id := createID()
     err := w.c.Find(bson.M{"firstname": firstName, "lastname": lastName, "email": EMail}).One(&result)
     if(err != nil) {
-        err = w.c.Insert(&User{firstName, lastName, EMail})
+        err = w.c.Insert(&User{id, firstName, lastName, EMail})
+        return id, err
     }
-    return err
+    id = result.ID
+    return id, err
 }
 
 func (w *MongoWrapper) Find(email string) (string, error) {
@@ -49,8 +63,8 @@ func (w *MongoWrapper) Find(email string) (string, error) {
     return string(b), nil
 }
 
-func (w *MongoWrapper) Remove(email string) error {
-    colQuerier := bson.M{"email":email}
+func (w *MongoWrapper) Remove(id string) error {
+    colQuerier := bson.M{"id":id}
     err := w.c.Remove(colQuerier)
     return err
 }
