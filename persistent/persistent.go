@@ -1,4 +1,4 @@
-package todoer
+package persistent
 
 import (
     "gopkg.in/mgo.v2"

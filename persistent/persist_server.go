@@ -1,4 +1,4 @@
-package todoer
+package persistent
 
 import (
     "io/ioutil"
@@ -23,7 +23,7 @@ func userGetHandler(w http.ResponseWriter, r *http.Request) {
     }
     req = strings.TrimRight(req, ",")
     req = req + `}`
-    res, code := persistHandler.persistHandlerRead(req)
+    res, code := persistHandler.PersistHandlerRead(req)
     w.WriteHeader(code)
     w.Write([]byte(res))
 }
@@ -35,7 +35,7 @@ func userPutHandler(w http.ResponseWriter, r *http.Request) {
     if(err != nil) {
         panic(err)
     }
-    res, code := persistHandler.persistHandlerCreate(string(body))
+    res, code := persistHandler.PersistHandlerCreate(string(body))
     w.WriteHeader(code)
     w.Write([]byte(res))
 }
@@ -45,7 +45,7 @@ func userDeleteHandler(w http.ResponseWriter, r *http.Request) {
     if(err != nil) {
         panic(err)
     }
-    res, code := persistHandler.persistHandlerDelete(`{"id": "`+r.URL.Query().Get("id")+`"}`)
+    res, code := persistHandler.PersistHandlerDelete(`{"id": "`+r.URL.Query().Get("id")+`"}`)
     w.WriteHeader(code)
     w.Write([]byte(res))
 }
@@ -56,7 +56,7 @@ func userUpdateHandler(w http.ResponseWriter, r *http.Request) {
     if(err != nil) {
         panic(err)
     }
-    res, code := persistHandler.persistHandlerUpdate(`{"id": "`+r.URL.Query().Get("id")+`"}`, string(body))
+    res, code := persistHandler.PersistHandlerUpdate(`{"id": "`+r.URL.Query().Get("id")+`"}`, string(body))
     w.WriteHeader(code)
     w.Write([]byte(res))
 }

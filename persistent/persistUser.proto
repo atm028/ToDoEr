@@ -1,0 +1,28 @@
+syntax "proto3";
+
+package todoer.srv.persistent
+
+service PersistentServiceHandleInterface {
+ rpc ReadUser(UserRequest) returns (UserResponse) {}
+}
+
+
+namespace  UserRequest struct {
+   optional string ID = 1;
+   optional string FirstName = 2; 
+   optional string LastName = 3;
+   optional string EMail = 4;
+}
+
+type  UserResponse struct {
+   optional string ID          = 1;
+   optional string FirstName   = 2;
+   optional string LastName    = 3;
+   optional string EMail       = 4;
+   optional string StatusCode  = 5;
+   optional string Msg         = 6;
+}
+
+
+
+

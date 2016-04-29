@@ -1,4 +1,4 @@
-package todoer
+package persistent
 
 import (
     "encoding/json"
@@ -19,7 +19,7 @@ func NewPersistHandler() (*PersistHandler, error) {
     return w, nil
 }
 
-func (w *PersistHandler)persistHandlerCreate(query string) (string ,int) {
+func (w *PersistHandler)PersistHandlerCreate(query string) (string ,int) {
     var dat User
     err := json.Unmarshal([]byte(query), &dat)
     if(err != nil) {
@@ -34,7 +34,7 @@ func (w *PersistHandler)persistHandlerCreate(query string) (string ,int) {
     return rsp, 201
 }
 
-func (w *PersistHandler)persistHandlerRead(query string) (string, int) {
+func (w *PersistHandler)PersistHandlerRead(query string) (string, int) {
     var dat User
     err := json.Unmarshal([]byte(query), &dat)
     if(err != nil) {
@@ -43,7 +43,6 @@ func (w *PersistHandler)persistHandlerRead(query string) (string, int) {
     }
 
     res, err := w.h.Find(dat.EMail)
-    err = json.Unmarshal([]byte(query), &dat)
     if(err != nil) {
         return `{"reason": "Problem with reading of user with EMail:"`+dat.EMail+
             `"error": "`+err.Error()+`"}`, 500
@@ -51,11 +50,11 @@ func (w *PersistHandler)persistHandlerRead(query string) (string, int) {
     return res, 200
 }
 
-func (w *PersistHandler)persistHandlerUpdate(query, value string) (string, int) {
+func (w *PersistHandler)PersistHandlerUpdate(query, value string) (string, int) {
     return "", 200
 }
 
-func (w *PersistHandler)persistHandlerDelete(query string) (string, int) {
+func (w *PersistHandler)PersistHandlerDelete(query string) (string, int) {
     var dat User
     err := json.Unmarshal([]byte(query), &dat)
     if(err != nil) {

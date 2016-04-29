@@ -1,4 +1,4 @@
-package todoer
+package persistent
 
 import (
     "encoding/json"
