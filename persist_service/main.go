@@ -3,6 +3,7 @@ package main
 import jsonpd "github.com/golang/protobuf/jsonpb"
 import (
     persistent "github.com/atm028/GoToDoEr/persistent"
+    elastic "github.com/atm028/GoToDoEr/elasticservice"
     "strconv"
     "github.com/micro/go-micro"
     "encoding/json"
@@ -10,6 +11,31 @@ import (
     "log"
     "golang.org/x/net/context"
 )
+
+type ElasticServiceHandleInterface struct {}
+
+func (h *ElasticServiceHandleInterface) CreateDoc(ctx context.Context, req *elastic.Request, rsp *elastic.Response) error {
+    es, err := elastic.NewESService()
+    if(err != nil) {
+        log.Fatal(err)
+    }
+
+    res, code := es.Create(req.Index, req.Type, req.Value)
+    rsp.StatusCode = strconv.Itoa(code)
+    rsp.Msg = string(res)
+    return nil
+}
+
+func (h *ElasticServiceHandleInterface) GetAllDocsByUser(ctx context.Context, req *elastic.Request, rsp *elastic.Response) {
+    es, err := elastic.NewESService()
+    if(err != nill) {
+        log.Fatal(err)
+    }
+    res, code := es.Search(req.Index, req.Key, req.Value)
+    rsp.StatusCode = strconv.Itoa(code)
+    rsp.Msg = string(res)
+    return nil
+}
 
 type PersistentServiceHandleInterface struct {}
 
