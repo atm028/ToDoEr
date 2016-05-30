@@ -2,9 +2,9 @@ package elasticservice
 
 import proto "github.com/golang/protobuf/proto"
 import (
-    "fmt"
     server "github.com/micro/go-micro/server"
     context "golang.org/x/net/context"
+    //elastic "gopkg.in/olivere/elastic.v3"
 )
 
 type Request struct {
@@ -32,7 +32,8 @@ func init() {
 }
 
 type ElasticServiceHandler interface {
-    ElasticServiceHandler
+    CreateDoc(context.Context, *Request, *Response) error
+    GetAllDocsByUser(context.Context, *Request, *Response) error
 }
 
 type ElasticServiceHandleInterface struct {

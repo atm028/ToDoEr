@@ -3,7 +3,6 @@ package main
 import jsonpd "github.com/golang/protobuf/jsonpb"
 import (
     persistent "github.com/atm028/GoToDoEr/persistent"
-    elastic "github.com/atm028/GoToDoEr/elasticservice"
     "strconv"
     "github.com/micro/go-micro"
     "encoding/json"
@@ -11,31 +10,6 @@ import (
     "log"
     "golang.org/x/net/context"
 )
-
-type ElasticServiceHandleInterface struct {}
-
-func (h *ElasticServiceHandleInterface) CreateDoc(ctx context.Context, req *elastic.Request, rsp *elastic.Response) error {
-    es, err := elastic.NewESService()
-    if(err != nil) {
-        log.Fatal(err)
-    }
-
-    res, code := es.Create(req.Index, req.Type, req.Value)
-    rsp.StatusCode = strconv.Itoa(code)
-    rsp.Msg = string(res)
-    return nil
-}
-
-func (h *ElasticServiceHandleInterface) GetAllDocsByUser(ctx context.Context, req *elastic.Request, rsp *elastic.Response) {
-    es, err := elastic.NewESService()
-    if(err != nill) {
-        log.Fatal(err)
-    }
-    res, code := es.Search(req.Index, req.Key, req.Value)
-    rsp.StatusCode = strconv.Itoa(code)
-    rsp.Msg = string(res)
-    return nil
-}
 
 type PersistentServiceHandleInterface struct {}
 
@@ -107,14 +81,14 @@ func(h *PersistentServiceHandleInterface) DeleteUser(ctx context.Context, req *p
 }
 
 func main() {
-    service := micro.NewService(
+    pService := micro.NewService(
         micro.Name("todoer.srv.persistent"),
         micro.RegisterTTL(time.Second*30),
         micro.RegisterInterval(time.Second*10),
     )
-    service.Init()
-    persistent.RegisterPersistentServiceHandlers(service.Server(), new(PersistentServiceHandleInterface))
-    if err := service.Run(); err != nil {
+    pService.Init()
+    persistent.RegisterPersistentServiceHandlers(pService.Server(), new(PersistentServiceHandleInterface))
+    if err := pService.Run(); err != nil {
         log.Fatal(err)
     }
 }

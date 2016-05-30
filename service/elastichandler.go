@@ -1,7 +1,8 @@
 package elasticservice
 
 import (
-    "encoding/json"
+    "fmt"
+    //"encoding/json"
 )
 
 type ElasticHandler struct {
@@ -18,18 +19,20 @@ func NewElasticHandler() (*ElasticHandler, error) {
     return w, nil
 }
 
-func (w *ElasticHandler) ElasticHandlerCreate(index, tp, query string) (string, error) {
-    rsp, err := w.h.Create(index, tp, query)
-    if(err != nill) {
+func (w *ElasticHandler) Create(index, tp, query string) (string, int) {
+    _, err := w.h.Create(index, tp, query)
+    if(err != nil) {
         return `{"reason": "Problem with document creation:", "index": "`+index+
-        `", "type":"`+tp+`", "value": "`+query+`", "error": "`+err.Erro()+`"}`, 500
+        `", "type":"`+tp+`", "value": "`+query+`", "error": "`+err.Error()+`"}`, 500
     }
-    return rsp, 201
+    return "", 201
 }
 
-func (w *ElasticHandler) ElasticHandlerSearch(index, key, value string) (string, error) {
+func (w *ElasticHandler) Search(index, key, value string) (string, int) {
+    fmt.Println("ElasticHandler:Search")
     rsp, err := w.h.Search(index, key, value)
     if(err != nil) {
+        fmt.Println("ElasticHandler:Search Error")
         return `{"reason": "Problem with document quering", "index": "`+index+
         `", "key": "`+key+`", "value":"`+value+`", "error": "`+err.Error()+`"}`, 500
     }
